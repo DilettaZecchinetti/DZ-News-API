@@ -204,3 +204,32 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("PATCH:200 updates the vote count of a specified article", () => {
+    const newVote = {
+      inc_votes: 2,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.votes).toBeGreaterThan(0);
+        expect(body.article.votes).toBe(102);
+      });
+  });
+
+  test("PATCH:200 updates the vote count of a specified article with a negative decrement", () => {
+    const newVote = {
+      inc_votes: -102,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.votes).toBe(-2);
+      });
+  });
+});
