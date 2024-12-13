@@ -107,3 +107,36 @@ describe("GET /api/articles", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id/comments", () => {
+  const validArticleIds = [1, 3, 5, 6, 9];
+  validArticleIds.forEach((article_id) => {
+    test("200: responds with an array of the comments for specific article id", () => {
+      return request(app)
+        .get(`/api/articles/${article_id}/comments`)
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject({
+              comment_id: expect.any(Number),
+              body: expect.any(String),
+              article_id: expect.any(Number),
+              author: expect.any(String),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+            });
+          });
+        });
+    });
+  });
+
+  test("404: Responds with an appropriate status and error message when given a valid but non-existent article_id", () => {
+    const article_id = 321;
+    return request(app)
+      .get(`/api/articles/${article_id}/comment`)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Endpoint not found");
+      });
+  });
+});
