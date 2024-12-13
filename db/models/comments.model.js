@@ -28,3 +28,15 @@ exports.addComment = (article_id, newComment) => {
 };
 
 exports.fetchCommentsByArticleId = fetchCommentsByArticleId;
+
+exports.removeCommentById = (comment_id) => {
+  const query = `
+    DELETE FROM comments
+    WHERE comment_id = $1
+    RETURNING *;
+  `;
+
+  return db.query(query, [comment_id]).then((result) => {
+    return result.rowCount > 0; // Returns true if a row was deleted, false otherwise
+  });
+};
