@@ -3,6 +3,7 @@ const request = require("supertest");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
 const app = require("../app");
+require("jest-extended");
 
 const db = require("../db/connection");
 
@@ -322,7 +323,6 @@ describe("GET /api/articles", () => {
 
         articles.forEach((article, index) => {
           if (index > 0) {
-            // Convert created_at to timestamps for comparison
             const currentCreatedAt = new Date(article.created_at).getTime();
             const previousCreatedAt = new Date(
               articles[index - 1].created_at
