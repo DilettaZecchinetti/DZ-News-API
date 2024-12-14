@@ -2,7 +2,6 @@ const {
   fetchArticleById,
   fetchAllArticles,
   updateArticleByArticleId,
-  fetchSortedArticles,
 } = require("../models/articles.model");
 
 exports.getArticleById = (req, res, next) => {
@@ -55,4 +54,30 @@ exports.getSortedArticles = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.fetchSortedArticles = (sortBy = "created_at", order = "desc") => {
+  const validSortByColumns = [
+    "created_at",
+    "title",
+    "author",
+    "votes",
+    "topic",
+  ];
+  const validOrders = ["asc", "desc"];
+
+  const sanitizedSortBy = validSortByColumns.includes(sortBy)
+    ? sortBy
+    : "created_at";
+  const sanitizedOrder = validOrders.includes(order?.toLowerCase())
+    ? order
+    : "desc";
+
+  const queryStr = `
+    SELECT article_id, title, topic, author, created_at, votes
+    FROM articles
+    ORDER BY ${sanitizedSortBy} ${sanitizedOrder};
+  `;
+
+  return db.query(queryStr).then(({ rows }) => rows);
 };
