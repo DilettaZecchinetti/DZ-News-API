@@ -7,6 +7,7 @@ const {
   getArticleById,
   getAllArticles,
   patchArticleByArticleId,
+  getSortedArticles,
 } = require("./db/controllers/articles.controller.js");
 
 const {
@@ -24,6 +25,8 @@ app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles", getAllArticles);
+
+app.get("/api/articles", getSortedArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 

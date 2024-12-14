@@ -2,6 +2,7 @@ const {
   fetchArticleById,
   fetchAllArticles,
   updateArticleByArticleId,
+  fetchSortedArticles,
 } = require("../models/articles.model");
 
 exports.getArticleById = (req, res, next) => {
@@ -42,4 +43,16 @@ exports.patchArticleByArticleId = (req, res, next) => {
       res.status(200).send({ article: updatedArticle });
     })
     .catch(next);
+};
+
+exports.getSortedArticles = (req, res, next) => {
+  const { sort_by, order } = req.query;
+  fetchSortedArticles(sort_by, order)
+    .then((articles) => {
+      console.log(articles);
+      res.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
