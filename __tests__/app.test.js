@@ -284,4 +284,60 @@ describe("GET /api/users", () => {
         });
       });
   });
+
+  test("404: responds with error as user do not exist", () => {
+    return request(app)
+      .get("/api/kiwi")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Endpoint not found");
+      });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: responds with an array of article objects, sorted by default 'created_at' in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+
+        articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              article_img_url: expect.any(String),
+              author: expect.any(String),
+              comment_count: expect.any(Number),
+              created_at: expect.any(String),
+              title: expect.any(String),
+              topic: expect.any(String),
+              votes: expect.any(Number),
+            })
+          );
+        });
+
+        articles.forEach((article, index) => {
+          if (index > 0) {
+            // Convert created_at to timestamps for comparison
+            const currentCreatedAt = new Date(article.created_at).getTime();
+            const previousCreatedAt = new Date(
+              articles[index - 1].created_at
+            ).getTime();
+
+            expect(currentCreatedAt).toBeLessThanOrEqual(previousCreatedAt);
+          }
+        });
+      });
+  });
+
+  test("404: responds with an error if the endpoint is invalid", async () => {
+    const { body } = await request(app)
+      .get("/api/invalid_endpoint")
+      .expect(404);
+    expect(body.msg).toBe("Endpoint not found");
+  });
 });
