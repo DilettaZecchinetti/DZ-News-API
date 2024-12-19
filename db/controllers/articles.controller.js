@@ -1,7 +1,7 @@
 const {
   fetchArticleById,
   fetchAllArticles,
-  updateArticleByArticleId,
+  updateArticleVotesByArticleId,
 } = require("../models/articles.model");
 
 exports.getArticleById = (req, res, next) => {
@@ -26,15 +26,15 @@ exports.getAllArticles = (req, res, next) => {
     });
 };
 
-exports.patchArticleByArticleId = (req, res, next) => {
+exports.updateArticleVotesByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
-
-  if (isNaN(Number(article_id))) {
+  const parsedArticleId = parseInt(article_id, 10);
+  if (isNaN(parsedArticleId)) {
     return res.status(400).send({ msg: "Invalid article_id" });
   }
 
-  updateArticleByArticleId(article_id, inc_votes)
+  updateArticleVotesByArticleId(parsedArticleId, inc_votes)
     .then((updatedArticle) => {
       if (!updatedArticle) {
         return res.status(404).send({ msg: "Article not found" });

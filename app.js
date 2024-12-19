@@ -9,7 +9,7 @@ const { getTopics } = require("./db/controllers/topics.controller.js");
 const {
   getArticleById,
   getAllArticles,
-  patchArticleByArticleId,
+  updateArticleVotesByArticleId,
   getSortedArticles,
 } = require("./db/controllers/articles.controller.js");
 
@@ -35,7 +35,7 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postCommentToArticleId);
 
-app.patch("/api/articles/:article_id", patchArticleByArticleId);
+app.patch("/api/articles/:article_id", updateArticleVotesByArticleId);
 
 app.delete("/api/comments/:comment_id", deleteCommentById);
 

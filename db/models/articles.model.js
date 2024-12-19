@@ -72,14 +72,14 @@ exports.fetchAllArticles = (sort_by = "created_at", order = "desc", topic) => {
   return db.query(queryForArticle, queryParams).then(({ rows }) => rows);
 };
 
-exports.updateArticleByArticleId = (article_id, inc_votes) => {
+exports.updateArticleVotesByArticleId = (articleId, incVotes) => {
   return db
     .query(
       `UPDATE articles 
      SET votes = votes + $1 
      WHERE article_id = $2 
      RETURNING *`,
-      [inc_votes, article_id]
+      [incVotes, articleId]
     )
     .then((result) => {
       if (result.rows.length === 0) {
