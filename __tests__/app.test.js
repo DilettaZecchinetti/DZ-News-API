@@ -87,6 +87,7 @@ describe("GET /api/articles", () => {
         expect(articles).toHaveLength(13);
         articles.forEach((article) => {
           expect(article).toMatchObject({
+            article_id: expect.any(Number),
             title: expect.any(String),
             topic: expect.any(String),
             author: expect.any(String),
