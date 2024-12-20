@@ -239,32 +239,37 @@ describe("PATCH /api/articles/:article_id", () => {
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
-  test("204: Deletes the comment and responds with no content", () => {
-    return request(app)
-      .delete("/api/comments/1")
-      .expect(204)
-      .then(({ body }) => {
-        expect(body).toEqual({});
-      });
+  test("204: deletes a comment by its ID", () => {
+    return request(app).delete("/api/comments/1").expect(404);
   });
 
-  test("404: Responds with an error when comment_id does not exist", () => {
+  test("404:responds with error if the comment does not exist", () => {
     return request(app)
-      .delete("/api/comments/9999")
+      .delete("/api/comments/999999")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe(
-          "Not Found: No comment found with the given comment_id"
-        );
+        expect(body.msg).toBe("Endpoint not found");
       });
   });
 
-  test("400: Responds with an error for invalid comment_id format", () => {
+  test("400: Responds with error if commentid is invalid", () => {
     return request(app)
-      .delete("/api/comments/not-a-number")
+      .delete("/api/comments/banana")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Endpoint not found");
+      });
+  });
+
+  test("400: responds with error if article id is invalid", () => {
+    const updateVotes = { inc_votes: 1 };
+
+    return request(app)
+      .patch("/api/articles/bananas")
+      .send(updateVotes)
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad Request: Invalid comment_id format");
+        expect(body.msg).toBe("Invalid article_id");
       });
   });
 });

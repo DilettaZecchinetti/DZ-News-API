@@ -1,6 +1,6 @@
 const { fetchCommentsByArticleId } = require("../models/comments.model");
 const { checkArticleExists } = require("../models/comments.model");
-const { removeCommentById } = require("../models/comments.model");
+const { deleteCommentById } = require("../models/comments.model");
 const { addComment } = require("../models/comments.model");
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -36,24 +36,17 @@ exports.postCommentToArticleId = (req, res, next) => {
     .catch(next);
 };
 
-exports.deleteCommentById = (req, res, next) => {
-  const { comment_id } = req.params;
+exports.deleteComment = (req, res, next) => {
+  const { comment_id: commentId } = req.params;
 
-  removeCommentById(comment_id)
-    .then((deleted) => {
-      if (!deleted) {
-        return res.status(404).send({
-          msg: "Not Found: No comment found with the given comment_id",
-        });
-      }
+  const parsedCommentId = parseInt(commentId, 10);
+  if (isNaN(parsedCommentId)) {
+    return res.status(400).send({ msg: "Invalid comment ID" });
+  }
+  checkCommentExists(parsedCommentId)
+    .then(() => deleteCommentById(parsedCommentId))
+    .then(() => {
       res.status(204).send();
     })
-    .catch((err) => {
-      if (err.code === "22P02") {
-        // Invalid comment_id format
-        res.status(400).send({ msg: "Bad Request: Invalid comment_id format" });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };

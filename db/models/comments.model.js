@@ -45,14 +45,15 @@ exports.addComment = (article_id, username, body) => {
 
 exports.fetchCommentsByArticleId = fetchCommentsByArticleId;
 
-exports.removeCommentById = (comment_id) => {
+exports.deleteCommentById = (comment_id) => {
   const query = `
     DELETE FROM comments
     WHERE comment_id = $1
     RETURNING *;
   `;
-
-  return db.query(query, [comment_id]).then((result) => {
-    return result.rowCount > 0; // Returns true if a row was deleted, false otherwise
+  return db.query(query, [comment_id]).then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Comment not found" });
+    }
   });
 };
