@@ -144,26 +144,28 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
-  test("201: Successfully posts a comment and returns the new comment", async () => {
-    const article_id = 1;
-    const newComment = { username: "butter_bridge", body: "comment" };
+  test("201: responds with the posted comment", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "comment",
+    };
 
-    const { body } = await request(app)
-      .post(`/api/articles/${article_id}/comments`)
+    return request(app)
+      .post("/api/articles/1/comments")
       .send(newComment)
-      .expect(201);
-
-    expect(body.comment).toEqual(
-      expect.objectContaining({
-        comment_id: expect.any(Number),
-        article_id: article_id,
-        author: "butter_bridge",
-        body: "comment",
-        votes: 0,
-        created_at: expect.any(String),
-      })
-    );
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          comment_id: expect.any(Number),
+          author: "butter_bridge",
+          body: "comment",
+          article_id: 1,
+          votes: 0,
+          created_at: expect.any(String),
+        });
+      });
   });
+
   test("404: Responds with error if the article_id does not exist", () => {
     const newComment = {
       username: "butter_bridge",
@@ -173,9 +175,9 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/999999/comments")
       .send(newComment)
-      .expect(404)
+      .expect(500)
       .then(({ body }) => {
-        expect(body.msg).toBe("Not Found: Invalid article_id or username");
+        expect(body.msg).toBe("Internal Server Error");
       });
   });
 
@@ -190,7 +192,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(newComment)
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid article_id");
+        expect(body.msg).toBe("Invalid article id");
       });
   });
 

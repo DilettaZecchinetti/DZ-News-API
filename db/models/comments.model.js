@@ -11,20 +11,36 @@ const fetchCommentsByArticleId = (article_id) => {
   });
 };
 
-exports.addComment = (article_id, newComment) => {
-  const { username, body } = newComment;
+exports.checkArticleExists = (article_id) => {
+  const query = `
+    SELECT * FROM articles WHERE article_id = $1;
+  `;
+  return db.query(query, [article_id]).then(({ rows }) => {
+    if (rows.length === 0) {
+      // If no articles are found, throw a 404 error
+      return Promise.reject({ status: 404, msg: "not found" });
+    }
+    return rows[0];
+  });
+};
 
+exports.addComment = (article_id, username, body) => {
   const query = `
     INSERT INTO comments (article_id, author, body)
     VALUES ($1, $2, $3)
-    RETURNING comment_id, article_id, author, body, votes, created_at;
+    RETURNING *;
   `;
-
   const values = [article_id, username, body];
 
-  return db.query(query, values).then((result) => {
-    return result.rows[0];
-  });
+  return db
+    .query(query, values)
+    .then((result) => result.rows[0])
+    .catch((err) => {
+      if (err.code === "23503") {
+        return Promise.reject({ status: 404, msg: "not found" });
+      }
+      return Promise.reject(err);
+    });
 };
 
 exports.fetchCommentsByArticleId = fetchCommentsByArticleId;
