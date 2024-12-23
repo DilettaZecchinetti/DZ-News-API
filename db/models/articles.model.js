@@ -51,13 +51,13 @@ exports.fetchAllArticles = (sort_by = "created_at", order = "desc", topic) => {
   }
   const queryParams = [];
   let queryForArticle = `
-      SELECT
-        articles.article_id, articles.author, articles.title, articles.topic,
-        articles.created_at, articles.votes, articles.article_img_url,
-        COUNT(comments.article_id)::INT AS comment_count
-      FROM articles
-      LEFT JOIN comments ON comments.article_id = articles.article_id
-    `;
+SELECT 
+  articles.article_id, articles.author, articles.title, articles.topic, 
+  articles.created_at, articles.votes, articles.article_img_url, 
+  COUNT(comments.article_id)::INT AS comment_count
+FROM articles
+LEFT JOIN comments ON comments.article_id = articles.article_id
+`;
 
   if (topic) {
     queryForArticle += ` WHERE articles.topic = $1 `;
@@ -65,9 +65,9 @@ exports.fetchAllArticles = (sort_by = "created_at", order = "desc", topic) => {
   }
 
   queryForArticle += `
-      GROUP BY articles.article_id
-      ORDER BY ${sort_by} ${order.toUpperCase()}
-    `;
+GROUP BY articles.article_id
+ORDER BY ${sort_by} ${order.toUpperCase()}
+`;
 
   return db.query(queryForArticle, queryParams).then(({ rows }) => rows);
 };

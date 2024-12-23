@@ -10,7 +10,6 @@ const {
   getArticleById,
   getAllArticles,
   updateArticleVotesByArticleId,
-  getSortedArticles,
 } = require("./db/controllers/articles.controller.js");
 
 const {
@@ -29,8 +28,6 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles", getAllArticles);
 
-app.get("/api/articles", getSortedArticles);
-
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postCommentToArticleId);
@@ -47,9 +44,17 @@ app.use("/*", (req, res) => {
 
 app.use((err, req, res, next) => {
   if (!res.headersSent) {
+    if (err.status && err.msg) {
+      return res.status(err.status).send({ msg: err.msg });
+    }
+
     console.error(err);
-    res.status(500).send({ msg: "Internal Server Error" });
+    return res.status(500).send({ msg: "Internal Server Error" });
   }
+});
+
+app.all("*", (req, res) => {
+  res.status(404).send({ msg: "Route not found" });
 });
 
 module.exports = app;

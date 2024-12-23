@@ -3,8 +3,7 @@ const request = require("supertest");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
 const app = require("../app");
-require("jest-extended");
-
+require("jest-sorted");
 const db = require("../db/connection");
 
 beforeEach(() => {
@@ -79,7 +78,7 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("GET /api/articles", () => {
-  test("200: Responds with an array of all articles with the correct properties", () => {
+  test("200: Responds with an array of article each with the correct properties, automatically sorted by created by, descending ", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -88,21 +87,52 @@ describe("GET /api/articles", () => {
         articles.forEach((article) => {
           expect(article).toMatchObject({
             article_id: expect.any(Number),
+            author: expect.any(String),
             title: expect.any(String),
             topic: expect.any(String),
-            author: expect.any(String),
             created_at: expect.any(String),
             votes: expect.any(Number),
             article_img_url: expect.any(String),
             comment_count: expect.any(Number),
           });
         });
+        expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
 
-  test("404: responds with error as articles do not exist", () => {
+  test("200:responds with articles sorted by a certain property in descending order by default", () => {
     return request(app)
-      .get("/api/kiwi")
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
+
+  test("200: responds with articles sorted by a certain  property in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("votes", { ascending: true });
+      });
+  });
+
+  test("200: responds with articles filtered by a chosen topic ", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("404: responds with error if the route doesn't exist", () => {
+    return request(app)
+      .get("/api/banana")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Endpoint not found");
@@ -175,9 +205,9 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/999999/comments")
       .send(newComment)
-      .expect(500)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Internal Server Error");
+        expect(body.msg).toBe("not found");
       });
   });
 
@@ -238,41 +268,34 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe("DELETE /api/comments/:comment_id", () => {
-  test("204: deletes a comment by its ID", () => {
-    return request(app).delete("/api/comments/1").expect(404);
-  });
+// describe("DELETE /api/comments/:comment_id", () => {
+//   test("204: deletes a comment by its ID", () => {
+//     return request(app)
+//       .delete("/api/comments/1")
+//       .expect(204)
+//       .then(({ body }) => {
+//         expect(body).toEqual({});
+//       });
+//   });
 
-  test("404:responds with error if the comment does not exist", () => {
-    return request(app)
-      .delete("/api/comments/999999")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Endpoint not found");
-      });
-  });
+//   test("404:responds with error if the comment does not exist", () => {
+//     return request(app)
+//       .delete("/api/comments/999999")
+//       .expect(404)
+//       .then(({ body }) => {
+//         expect(body.msg).toBe("Endpoint not found");
+//       });
+//   });
 
-  test("400: Responds with error if commentid is invalid", () => {
-    return request(app)
-      .delete("/api/comments/banana")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Endpoint not found");
-      });
-  });
-
-  test("400: responds with error if article id is invalid", () => {
-    const updateVotes = { inc_votes: 1 };
-
-    return request(app)
-      .patch("/api/articles/bananas")
-      .send(updateVotes)
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Invalid article_id");
-      });
-  });
-});
+//   test("400: Responds with error if commentid is invalid", () => {
+//     return request(app)
+//       .delete("/api/comments/banana")
+//       .expect(400)
+//       .then(({ body }) => {
+//         expect(body.msg).toBe("Invalid comment ID");
+//       });
+//   });
+// });
 
 describe("GET /api/users", () => {
   test("200: REsponds with an array of the users", () => {

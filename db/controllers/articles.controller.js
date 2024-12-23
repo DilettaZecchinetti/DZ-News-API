@@ -16,16 +16,6 @@ exports.getArticleById = (req, res, next) => {
     });
 };
 
-exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles()
-    .then((articles) => {
-      res.status(200).send({ articles });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
 exports.updateArticleVotesByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
@@ -44,11 +34,10 @@ exports.updateArticleVotesByArticleId = (req, res, next) => {
     .catch(next);
 };
 
-exports.getSortedArticles = (req, res, next) => {
-  const { sort_by, order } = req.query;
-  fetchSortedArticles(sort_by, order)
+exports.getAllArticles = (req, res, next) => {
+  const { sort_by, order, topic } = req.query;
+  fetchAllArticles(sort_by, order, topic)
     .then((articles) => {
-      console.log(articles);
       res.status(200).send({ articles });
     })
     .catch((err) => {
