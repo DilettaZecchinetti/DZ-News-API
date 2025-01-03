@@ -20,6 +20,12 @@ const {
 
 const { getAllUsers } = require("./db/controllers/users.controller.js");
 
+const {
+  customErrorHandler,
+  postgressErrorHandler,
+  invalidUrlErrorHandler,
+} = require("./db/controllers/errors.controller.js");
+
 app.get("/api", getEndpoints);
 
 app.get("/api/topics", getTopics);
@@ -34,27 +40,14 @@ app.post("/api/articles/:article_id/comments", postCommentToArticleId);
 
 app.patch("/api/articles/:article_id", updateArticleVotesByArticleId);
 
-app.delete("/api/comments/:comment_id"), deleteComment;
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.get("/api/users", getAllUsers);
 
-app.use("/*", (req, res) => {
-  res.status(404).send({ msg: "Endpoint not found" });
-});
+app.all("*", invalidUrlErrorHandler);
 
-app.use((err, req, res, next) => {
-  if (!res.headersSent) {
-    if (err.status && err.msg) {
-      return res.status(err.status).send({ msg: err.msg });
-    }
+app.use(customErrorHandler);
 
-    console.error(err);
-    return res.status(500).send({ msg: "Internal Server Error" });
-  }
-});
-
-app.all("*", (req, res) => {
-  res.status(404).send({ msg: "Route not found" });
-});
+app.use(postgressErrorHandler);
 
 module.exports = app;

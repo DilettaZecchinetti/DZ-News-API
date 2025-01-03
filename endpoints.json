@@ -93,5 +93,16 @@
         "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
       }
     ]
+  },
+  "PATCH /api/comments/:comment_i": {
+    "description": "reponds with comment with updated votes property",
+    "exampleResponse": {
+      "comment_id": 1,
+      "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+      "votes": 10,
+      "author": "butter_bridge",
+      "article_id": 9,
+      "created_at": 1586179020000
+    }
   }
 }

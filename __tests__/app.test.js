@@ -1,17 +1,17 @@
 const endpointsJson = require("../endpoints.json");
 const request = require("supertest");
 const seed = require("../db/seeds/seed");
-const testData = require("../db/data/test-data/index");
+const testData = require("../db/data/test-data");
 const app = require("../app");
 require("jest-sorted");
 const db = require("../db/connection");
 
-beforeEach(() => {
-  return seed(testData);
-});
-
 afterAll(() => {
   return db.end();
+});
+
+beforeEach(() => {
+  return seed(testData);
 });
 
 describe("GET /api", () => {
@@ -50,7 +50,7 @@ test("404: Responds with an error when the endpoint does not exist", () => {
     .get("/api/non-existent-endpoint")
     .expect(404)
     .then(({ body }) => {
-      expect(body.msg).toBe("Endpoint not found");
+      expect(body.msg).toBe("Not found");
     });
 });
 
@@ -135,7 +135,7 @@ describe("GET /api/articles", () => {
       .get("/api/banana")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Endpoint not found");
+        expect(body.msg).toBe("Not found");
       });
   });
 });
@@ -168,7 +168,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get(`/api/articles/${article_id}/comment`)
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Endpoint not found");
+        expect(body.msg).toBe("Not found");
       });
   });
 });
@@ -268,34 +268,32 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-// describe("DELETE /api/comments/:comment_id", () => {
-//   test("204: deletes a comment by its ID", () => {
-//     return request(app)
-//       .delete("/api/comments/1")
-//       .expect(204)
-//       .then(({ body }) => {
-//         expect(body).toEqual({});
-//       });
-//   });
-
-//   test("404:responds with error if the comment does not exist", () => {
-//     return request(app)
-//       .delete("/api/comments/999999")
-//       .expect(404)
-//       .then(({ body }) => {
-//         expect(body.msg).toBe("Endpoint not found");
-//       });
-//   });
-
-//   test("400: Responds with error if commentid is invalid", () => {
-//     return request(app)
-//       .delete("/api/comments/banana")
-//       .expect(400)
-//       .then(({ body }) => {
-//         expect(body.msg).toBe("Invalid comment ID");
-//       });
-//   });
-// });
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: returns nothing in the body (no content) when a comment of a specific id is deleted", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+  test("404: returns Not found when a comment of a non existent id is attempted to be deleted", () => {
+    return request(app)
+      .delete("/api/comments/100")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Comment not found");
+      });
+  });
+  test("400: returns Bad request when a comment of an invalid id is attempted to be deleted", () => {
+    return request(app)
+      .delete("/api/comments/bananas")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid comment ID");
+      });
+  });
+});
 
 describe("GET /api/users", () => {
   test("200: REsponds with an array of the users", () => {
@@ -322,7 +320,7 @@ describe("GET /api/users", () => {
       .get("/api/kiwi")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Endpoint not found");
+        expect(body.msg).toBe("Not found");
       });
   });
 });
@@ -369,6 +367,6 @@ describe("GET /api/articles", () => {
     const { body } = await request(app)
       .get("/api/invalid_endpoint")
       .expect(404);
-    expect(body.msg).toBe("Endpoint not found");
+    expect(body.msg).toBe("Not found");
   });
 });

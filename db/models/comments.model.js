@@ -17,7 +17,6 @@ exports.checkArticleExists = (article_id) => {
   `;
   return db.query(query, [article_id]).then(({ rows }) => {
     if (rows.length === 0) {
-      // If no articles are found, throw a 404 error
       return Promise.reject({ status: 404, msg: "not found" });
     }
     return rows[0];
@@ -43,8 +42,6 @@ exports.addComment = (article_id, username, body) => {
     });
 };
 
-exports.fetchCommentsByArticleId = fetchCommentsByArticleId;
-
 exports.checkCommentExists = (comment_id) => {
   const query = `
     SELECT * FROM comments WHERE comment_id = $1;
@@ -68,3 +65,5 @@ exports.deleteCommentById = (comment_id) => {
     }
   });
 };
+
+exports.fetchCommentsByArticleId = fetchCommentsByArticleId;

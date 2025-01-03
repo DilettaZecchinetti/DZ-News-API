@@ -1,9 +1,9 @@
 const {
   fetchCommentsByArticleId,
   checkArticleExists,
+  addComment,
   checkCommentExists,
   deleteCommentById,
-  addComment,
 } = require("../models/comments.model");
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -46,8 +46,8 @@ exports.deleteComment = (req, res, next) => {
   if (isNaN(parsedCommentId)) {
     return res.status(400).send({ msg: "Invalid comment ID" });
   }
-
-  deleteCommentById(parsedCommentId)
+  checkCommentExists(parsedCommentId)
+    .then(() => deleteCommentById(parsedCommentId))
     .then(() => {
       res.status(204).send();
     })
