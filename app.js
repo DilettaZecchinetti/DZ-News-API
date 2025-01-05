@@ -18,7 +18,10 @@ const {
   deleteComment,
 } = require("./db/controllers/comments.controller.js");
 
-const { getAllUsers } = require("./db/controllers/users.controller.js");
+const {
+  getAllUsers,
+  getUserByUsername,
+} = require("./db/controllers/users.controller.js");
 
 const {
   customErrorHandler,
@@ -43,6 +46,8 @@ app.patch("/api/articles/:article_id", updateArticleVotesByArticleId);
 app.delete("/api/comments/:comment_id", deleteComment);
 
 app.get("/api/users", getAllUsers);
+
+app.get("/api/users/:username", getUserByUsername);
 
 app.all("*", invalidUrlErrorHandler);
 
